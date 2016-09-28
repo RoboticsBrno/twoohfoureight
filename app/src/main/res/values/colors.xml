@@ -1,10 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#303F9F</color>
-    <color name="colorAccent">#FF4081</color>
+    <color name="colorPrimary">#795548</color>
+    <color name="colorPrimaryDark">#5D4037</color>
+    <color name="colorAccent">#FF5722</color>
 
     <color name="baseBackground">#ffffff</color>
     <color name="gridBackground">#ffbbada0</color>
-    <color name="tileBackground">#80FFFFFF</color>
+    <color name="tileBackground">#5affffff</color>
+
+    <color name="tileTextLight">#f9f6f2</color>
+    <color name="tileTextDark">#776E65</color>
+
+    <array name="tileColors">
+        <item>#eee4da</item> <!-- 2 -->
+        <item>#eee4da</item> <!-- 4 -->
+        <item>#f78e48</item> <!-- 8 -->
+        <item>#fc5e2e</item> <!-- 16 -->
+        <item>#ff3333</item> <!-- 32 -->
+        <item>#ff0000</item> <!-- 64 -->
+    </array>
 </resources>

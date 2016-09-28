@@ -12,6 +12,7 @@
     tools:context="com.example.tassadar.twoohfoureight.MainActivity">
 
     <com.example.tassadar.twoohfoureight.GameView
+        android:id="@+id/game_view"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 </RelativeLayout>
