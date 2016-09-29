@@ -8,6 +8,7 @@ import android.util.AttributeSet;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.TextView;
 
 
 public class GameView extends View {
@@ -59,8 +60,8 @@ public class GameView extends View {
     private final View.OnLayoutChangeListener m_layoutChangeListener = new View.OnLayoutChangeListener() {
         @Override
         public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
-            m_renderer.dimensionsChanged(right - left, bottom - top);
-            m_controller.restoreState(m_renderer);
+            if(m_renderer.dimensionsChanged(right - left, bottom - top))
+                m_controller.restoreState(m_renderer);
         }
     };
 

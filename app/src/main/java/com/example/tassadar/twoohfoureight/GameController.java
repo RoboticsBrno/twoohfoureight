@@ -6,6 +6,10 @@ import java.util.HashSet;
 import java.util.Random;
 
 public class GameController {
+    public interface OnStateChangeListener {
+        void onScoreChanged(int score);
+    }
+
     public static final int GRID = 4;
     public static final int MAX_TILES = GRID*GRID;
 
@@ -27,9 +31,12 @@ public class GameController {
     private Random m_random;
     private PositionSeeker m_seeker;
 
+    private OnStateChangeListener m_listener;
+
     private static final int STATE_UNINITIALIZED = 0;
     private static final int STATE_IN_GAME = 1;
     private int m_state;
+    private int m_score;
 
     GameController() {
         m_tiles = new Tile[MAX_TILES];
@@ -43,15 +50,26 @@ public class GameController {
 
     private void initialize(Renderer renderer) {
         m_usedTiles = 0;
+        m_score = 0;
+        m_state = STATE_IN_GAME;
 
         renderer.removeAllTiles();
         for(int i = 0; i < START_TILES; ++i) {
             addRandomTile(renderer);
         }
 
-        m_state = STATE_IN_GAME;
-
         renderer.invalidate();
+    }
+
+    public void setListener(OnStateChangeListener listener) {
+        m_listener = listener;
+    }
+
+    private void setScore(int val) {
+        m_score = val;
+        if(m_listener != null) {
+            m_listener.onScoreChanged(m_score);
+        }
     }
 
     public void restoreState(Renderer renderer) {
@@ -73,6 +91,7 @@ public class GameController {
 
     public void saveInstanceState(Bundle state) {
         state.putInt("game_state", m_state);
+        state.putInt("game_score", m_score);
 
         int[] tileValues = new int[MAX_TILES];
         for(int i = 0; i < MAX_TILES; ++i) {
@@ -83,6 +102,8 @@ public class GameController {
 
     public void restoreInstanceState(Bundle state) {
         m_state = state.getInt("game_state");
+        setScore(state.getInt("game_score"));
+
         int[] tileValues = state.getIntArray("game_tiles");
         if(m_state >= STATE_IN_GAME && tileValues != null && tileValues.length == MAX_TILES) {
             for(int i = 0; i < MAX_TILES; ++i) {
@@ -100,7 +121,9 @@ public class GameController {
         }
 
         boolean moved = false;
+        int points = 0;
         int start, delta;
+
         if(direction > 0) {
             start = MAX_TILES - 1;
             delta = -1;
@@ -124,12 +147,15 @@ public class GameController {
                 moved = true;
 
                 if(m_seeker.isMerge) {
-                    renderer.mergeTiles(m_tiles[next].id, t.id, next);
+                    Tile nextTile = m_tiles[next];
+                    renderer.mergeTiles(nextTile.id, t.id, next);
 
-                    m_tiles[next].value *= 2;
+                    nextTile.value *= 2;
                     t.id = 0;
                     t.value = 0;
+
                     --m_usedTiles;
+                    points += nextTile.value;
                 } else {
                     renderer.setTilePosition(t.id, next, true);
                     m_tiles[i] = m_tiles[next];
@@ -137,6 +163,9 @@ public class GameController {
                 }
             }
         }
+
+        if(points != 0)
+            setScore(m_score + points);
 
         if(moved) {
             addRandomTile(renderer);

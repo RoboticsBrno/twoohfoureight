@@ -11,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.util.Log;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
 
@@ -23,6 +24,7 @@ public class RendererImpl implements Renderer {
     private static final float GRID_PADDING = 0.1f;
 
     private View m_view;
+    private int lastWidth, lastHeight;
 
     private Paint m_paintGrid;
     private Paint m_paintTile;
@@ -149,7 +151,14 @@ public class RendererImpl implements Renderer {
         m_view.invalidate();
     }
 
-    public void dimensionsChanged(int w, int h) {
+    public boolean dimensionsChanged(int w, int h) {
+        if(lastWidth == w && lastHeight == h) {
+            return false;
+        }
+
+        lastWidth = w;
+        lastHeight = h;
+
         if(w <= h) {
             int y = (h - w) / 2;
             m_gridRect = new RectF(0, y, w, y + w);
@@ -165,8 +174,13 @@ public class RendererImpl implements Renderer {
         m_tileTextDark.setTextSize(m_tileRects[0].height()*0.4f);
         m_tileTextLight.setTextSize(m_tileRects[0].height()*0.4f);
 
-        m_initialized = true;
         invalidate();
+
+        if(!m_initialized) {
+            m_initialized = true;
+            return true;
+        }
+        return false;
     }
 
     private void layoutTiles() {
