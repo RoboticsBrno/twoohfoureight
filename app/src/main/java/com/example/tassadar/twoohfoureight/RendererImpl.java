@@ -318,7 +318,11 @@ public class RendererImpl implements Renderer {
         }
     }
 
-    public ObjectAnimator setTilePosition(int tileId, int gridIdx, boolean animate) {
+    public void setTilePosition(int tileId, int gridIdx) {
+        setTilePosition(tileId, gridIdx, true);
+    }
+
+    private ObjectAnimator setTilePosition(int tileId, int gridIdx, boolean animate) {
         RenderedTile tile = m_tiles.get(tileId);
 
         final int src = tile.gridIndex;

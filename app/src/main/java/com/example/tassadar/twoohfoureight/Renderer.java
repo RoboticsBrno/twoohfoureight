@@ -8,7 +8,7 @@ public interface Renderer {
     void removeTile(int id);
     void removeAllTiles();
     void setTileValue(int tileId, int value);
-    ObjectAnimator setTilePosition(int tileId, int gridIdx, boolean animate);
+    void setTilePosition(int tileId, int gridIdx);
     void mergeTiles(int tileIdA, int tileIdB, int targetGridIdx);
 
     void shake();

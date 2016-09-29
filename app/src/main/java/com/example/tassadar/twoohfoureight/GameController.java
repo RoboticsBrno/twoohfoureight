@@ -160,7 +160,6 @@ public class GameController {
                 if(m_seeker.isMerge) {
                     Tile nextTile = m_tiles[next];
                     renderer.mergeTiles(nextTile.id, t.id, next);
-
                     nextTile.value *= 2;
                     t.id = 0;
                     t.value = 0;
@@ -168,7 +167,7 @@ public class GameController {
                     --m_usedTiles;
                     points += nextTile.value;
                 } else {
-                    renderer.setTilePosition(t.id, next, true);
+                    renderer.setTilePosition(t.id, next);
                     m_tiles[i] = m_tiles[next];
                     m_tiles[next] = t;
                 }
