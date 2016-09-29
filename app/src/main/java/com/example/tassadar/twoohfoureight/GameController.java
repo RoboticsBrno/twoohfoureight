@@ -25,6 +25,7 @@ public class GameController {
     private int m_tileIdCounter;
     private int m_usedTiles;
     private Random m_random;
+    private PositionSeeker m_seeker;
 
     private static final int STATE_UNINITIALIZED = 0;
     private static final int STATE_IN_GAME = 1;
@@ -37,6 +38,7 @@ public class GameController {
         }
 
         m_random = new Random();
+        m_seeker = new PositionSeeker();
     }
 
     private void initialize(Renderer renderer) {
@@ -109,7 +111,7 @@ public class GameController {
 
         renderer.finishAllAnimations();
 
-        HashSet<Integer> merged = new HashSet<>();
+        m_seeker.reset();
 
         for(int i = start; i >= 0 && i < MAX_TILES; i += delta) {
             Tile t = m_tiles[i];
@@ -117,24 +119,21 @@ public class GameController {
                 continue;
             }
 
-            if(!isEdgePosition(direction, i)) {
-                int next = findNextPosition(direction, i, t.value, merged);
+            if(!isEdgePosition(direction, i) && m_seeker.calculateNext(direction, i, t.value)) {
+                final int next = m_seeker.currentPos;
+                moved = true;
 
-                if(next != i && t.value == m_tiles[next].value) { // Merge
+                if(m_seeker.isMerge) {
                     renderer.mergeTiles(m_tiles[next].id, t.id, next);
 
                     m_tiles[next].value *= 2;
                     t.id = 0;
                     t.value = 0;
                     --m_usedTiles;
-
-                    merged.add(next);
-                    moved = true;
-                } else if(m_tiles[next].value == 0) { // just move
+                } else {
                     renderer.setTilePosition(t.id, next, true);
                     m_tiles[i] = m_tiles[next];
                     m_tiles[next] = t;
-                    moved = true;
                 }
             }
         }
@@ -147,14 +146,64 @@ public class GameController {
         renderer.invalidate();
     }
 
-    private int findNextPosition(int direction, int pos, int value, HashSet<Integer> merged) {
-        while(true) {
-            pos += direction;
-            if(m_tiles[pos].value != 0 && (m_tiles[pos].value != value || merged.contains(pos))) {
-                return pos - direction;
-            } else if(isEdgePosition(direction, pos) || m_tiles[pos].value == value) {
-                return pos;
+    private class PositionSeeker {
+        HashSet<Integer> merged;
+        int currentPos;
+        boolean isMerge;
+
+        PositionSeeker() {
+            merged = new HashSet<>();
+        }
+
+        void reset() {
+            merged.clear();
+        }
+
+        boolean calculateNext(int direction, int startPos, int value) {
+            currentPos = startPos;
+            isMerge = false;
+
+            final int startX = currentPos % GRID;
+            final int startY = currentPos / GRID;
+
+            while(true) {
+                int next = currentPos + direction;
+
+                // moves out of current row/column
+                if(isPastEdge(direction, next, startX, startY)) {
+                    return currentPos != startPos;
+                }
+
+                // moves over another tile
+                if(m_tiles[next].value != 0){
+                    // we can merge
+                    if(m_tiles[next].value == value && !merged.contains(next)) {
+                        currentPos = next;
+                        isMerge = true;
+                        merged.add(next);
+                        return true;
+                    } else {
+                        return currentPos != startPos;
+                    }
+                }
+
+                currentPos = next;
             }
+        }
+
+        private boolean isPastEdge(int direction, int pos, int startX, int startY) {
+            if(pos < 0 || pos >= MAX_TILES)
+                return true;
+
+            switch(direction) {
+                case LEFT:
+                case RIGHT:
+                    return pos / GRID != startY;
+                case UP:
+                case DOWN:
+                    return pos % GRID != startX;
+            }
+            return false;
         }
     }
 

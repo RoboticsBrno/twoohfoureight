@@ -307,6 +307,9 @@ public class RendererImpl implements Renderer {
     public ObjectAnimator setTilePosition(int tileId, int gridIdx, boolean animate) {
         RenderedTile tile = m_tiles.get(tileId);
 
+        final int src = tile.gridIndex;
+        final int dst = gridIdx;
+
         tile.gridIndex = gridIdx;
 
         if(!animate) {
@@ -316,13 +319,12 @@ public class RendererImpl implements Renderer {
         }
 
         ObjectAnimator anim;
-        float destX = m_tileRects[gridIdx].centerX();
-        float destY = m_tileRects[gridIdx].centerY();
 
-        if (Math.abs(destX - tile.center.x) > 1) {
-            anim = ObjectAnimator.ofFloat(tile, "x", tile.center.x, destX);
+        // is it on the same row?
+        if (src/GameController.GRID == dst/GameController.GRID) {
+            anim = ObjectAnimator.ofFloat(tile, "x", tile.center.x, m_tileRects[dst].centerX());
         } else {
-            anim = ObjectAnimator.ofFloat(tile, "y", tile.center.y, destY);
+            anim = ObjectAnimator.ofFloat(tile, "y", tile.center.y, m_tileRects[dst].centerY());
         }
 
         anim.setInterpolator(new OvershootInterpolator());
