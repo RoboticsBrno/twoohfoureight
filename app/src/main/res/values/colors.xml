@@ -4,9 +4,9 @@
     <color name="colorPrimaryDark">#5D4037</color>
     <color name="colorAccent">#FF5722</color>
 
-    <color name="baseBackground">#ffffff</color>
-    <color name="gridBackground">#ffbbada0</color>
-    <color name="tileBackground">#5affffff</color>
+    <color name="baseBackground">#faf8ef</color>
+    <color name="gridBackground">#bbada0</color>
+    <color name="tileBackground">#d3cac2</color>
 
     <color name="tileTextLight">#f9f6f2</color>
     <color name="tileTextDark">#776E65</color>

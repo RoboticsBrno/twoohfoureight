@@ -2,19 +2,18 @@ package com.example.tassadar.twoohfoureight;
 
 import android.annotation.TargetApi;
 import android.content.Context;
+import android.graphics.Canvas;
 import android.os.Build;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
-import android.view.SurfaceHolder;
-import android.view.SurfaceView;
+import android.view.View;
 
 
-public class GameView extends SurfaceView implements SurfaceHolder.Callback {
-    private RenderThread m_renderThread;
+public class GameView extends View {
     private GameController m_controller;
     private GestureDetector m_gestureDetector;
+    private RendererImpl m_renderer;
 
     public GameView(Context context) {
         super(context);
@@ -35,14 +34,16 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     public GameView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
         init(context);
+
+        setFocusable(true);
     }
 
     private void init(Context ctx) {
         m_controller = new GameController();
         m_gestureDetector = new GestureDetector(ctx, m_gestureListener);
 
-
-        getHolder().addCallback(this);
+        m_renderer = new RendererImpl(ctx, this);
+        this.addOnLayoutChangeListener(m_layoutChangeListener);
     }
 
     public GameController getController() {
@@ -50,28 +51,18 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
     }
 
     @Override
-    public void surfaceCreated(SurfaceHolder surfaceHolder) {
-        m_renderThread = new RenderThread(this.getContext(), surfaceHolder);
-        m_renderThread.start();
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        m_renderer.render(canvas);
     }
 
-    @Override
-    public void surfaceChanged(SurfaceHolder surfaceHolder, int format, int w, int h) {
-        m_renderThread.canvasDimensionsChanged(w, h);
-        m_controller.restoreState(m_renderThread);
-    }
-
-    @Override
-    public void surfaceDestroyed(SurfaceHolder surfaceHolder) {
-        m_renderThread.interrupt();
-        try {
-            m_renderThread.join();
-        } catch (InterruptedException e) {
-            Thread.currentThread().interrupt();
+    private final View.OnLayoutChangeListener m_layoutChangeListener = new View.OnLayoutChangeListener() {
+        @Override
+        public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
+            m_renderer.dimensionsChanged(right - left, bottom - top);
+            m_controller.restoreState(m_renderer);
         }
-        m_renderThread.cleanup();
-        m_renderThread = null;
-    }
+    };
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -96,9 +87,7 @@ public class GameView extends SurfaceView implements SurfaceHolder.Callback {
                 }
             }
 
-            Log.i("Test", String.format("direction %d vx %f vy %f x %f %f y %f %f", direction, velocityX, velocityY, e1.getX(), e2.getX(), e1.getY(), e2.getY()));
-
-            m_controller.onSwipe(direction, m_renderThread);
+            m_controller.onSwipe(direction, m_renderer);
 
             return super.onFling(e1, e2, velocityX, velocityY);
         }

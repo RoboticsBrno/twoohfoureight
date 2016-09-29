@@ -12,6 +12,7 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+
         m_gameView = (GameView)findViewById(R.id.game_view);
         m_controller = m_gameView.getController();
 
