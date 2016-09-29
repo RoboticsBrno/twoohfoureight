@@ -8,6 +8,7 @@ import java.util.Random;
 public class GameController {
     public interface OnStateChangeListener {
         void onScoreChanged(int score);
+        void onLoss();
     }
 
     public static final int GRID = 4;
@@ -35,6 +36,8 @@ public class GameController {
 
     private static final int STATE_UNINITIALIZED = 0;
     private static final int STATE_IN_GAME = 1;
+    private static final int STATE_LOST = 2;
+
     private int m_state;
     private int m_score;
 
@@ -48,12 +51,18 @@ public class GameController {
         m_seeker = new PositionSeeker();
     }
 
-    private void initialize(Renderer renderer) {
+    public void reinitialize(Renderer renderer) {
         m_usedTiles = 0;
-        m_score = 0;
         m_state = STATE_IN_GAME;
+        setScore(0);
 
         renderer.removeAllTiles();
+
+        for(Tile t : m_tiles) {
+            t.id = 0;
+            t.value = 0;
+        }
+
         for(int i = 0; i < START_TILES; ++i) {
             addRandomTile(renderer);
         }
@@ -75,9 +84,10 @@ public class GameController {
     public void restoreState(Renderer renderer) {
         switch(m_state) {
             case STATE_UNINITIALIZED:
-                initialize(renderer);
+                reinitialize(renderer);
                 break;
             case STATE_IN_GAME:
+            case STATE_LOST:
                 renderer.removeAllTiles();
                 for(int i = 0; i < MAX_TILES; ++i) {
                     if(m_tiles[i].value != 0) {
@@ -117,6 +127,7 @@ public class GameController {
 
     public void onSwipe(int direction, Renderer renderer) {
         if(m_state != STATE_IN_GAME) {
+            renderer.shake();
             return;
         }
 
@@ -169,6 +180,7 @@ public class GameController {
 
         if(moved) {
             addRandomTile(renderer);
+            checkForLoss();
         } else {
             renderer.shake();
         }
@@ -262,12 +274,34 @@ public class GameController {
     }
 
     private int getRandomFreePosition() {
-        while(m_usedTiles < MAX_TILES) {
+        if(m_usedTiles >= MAX_TILES)
+            throw new RuntimeException("There are no free positions on the grid");
+
+        while(true) {
             int idx = m_random.nextInt(MAX_TILES);
             if(m_tiles[idx].value == 0) {
                 return idx;
             }
         }
-        return 0;
+    }
+
+    private void checkForLoss() {
+        if(m_usedTiles < MAX_TILES)
+            return;
+
+        for(int y = 0; y < GRID; ++y) {
+            for(int x = 0; x < GRID; ++x) {
+                if (x < GRID - 1 && m_tiles[y*GRID + x].value == m_tiles[y*GRID + x + 1].value)
+                    return;
+                if (y < GRID - 1 && m_tiles[y*GRID + x].value == m_tiles[(y+1)*GRID + x].value)
+                    return;
+            }
+        }
+
+        // if we got here, it means there wer no mergeable tiles
+        m_state = STATE_LOST;
+        if(m_listener != null) {
+            m_listener.onLoss();
+        }
     }
 }

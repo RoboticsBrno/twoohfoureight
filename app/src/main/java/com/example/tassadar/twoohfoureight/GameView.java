@@ -51,6 +51,10 @@ public class GameView extends View {
         return m_controller;
     }
 
+    public void restartGame() {
+        m_controller.reinitialize(m_renderer);
+    }
+
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
