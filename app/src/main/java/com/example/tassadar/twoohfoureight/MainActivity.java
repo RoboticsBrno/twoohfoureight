@@ -35,8 +35,8 @@ public class MainActivity extends AppCompatActivity implements GameController.On
     }
 
     @Override
-    protected void onDestroy() {
-        super.onDestroy();
+    protected void onPause() {
+        super.onPause();
 
         SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
         m_controller.saveInstanceState(editor);
