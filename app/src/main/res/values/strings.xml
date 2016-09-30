@@ -4,4 +4,6 @@
     <string name="game_over_body">You have lost the game and got %d points.</string>
     <string name="ok">OK</string>
     <string name="restart">Restart</string>
+    <string name="you_have_won">You have won!</string>
+    <string name="you_have_won_body">You\'ve managed to create the 2048 tile, but you can still keep playing to get better score!</string>
 </resources>

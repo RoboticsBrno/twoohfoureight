@@ -17,11 +17,19 @@
         android:layout_height="wrap_content"
         android:layout_gravity="center"
         android:layout_marginTop="40dp"
-        android:layout_marginBottom="24dp"
         android:textSize="40sp"
         android:textStyle="bold"
         android:textColor="@color/colorAccent"
         android:text="0" />
+
+    <TextView android:id="@+id/status_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginBottom="24dp"
+        android:textStyle="bold"
+        android:textColor="@color/colorAccent"
+        android:text="@string/game_over" />
 
     <com.example.tassadar.twoohfoureight.GameView
         android:id="@+id/game_view"

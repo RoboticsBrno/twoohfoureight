@@ -15,6 +15,7 @@ public class MainActivity extends AppCompatActivity implements GameController.On
     private GameView m_gameView;
     private GameController m_controller;
     private TextView m_score;
+    private TextView m_statusText;
     private int m_lastScoreValue;
 
     @Override
@@ -23,6 +24,8 @@ public class MainActivity extends AppCompatActivity implements GameController.On
         setContentView(R.layout.activity_main);
 
         m_score = (TextView)findViewById(R.id.score);
+        m_statusText = (TextView)findViewById(R.id.status_text);
+
         m_gameView = (GameView)findViewById(R.id.game_view);
         m_controller = m_gameView.getController();
         m_controller.setListener(this);
@@ -58,6 +61,10 @@ public class MainActivity extends AppCompatActivity implements GameController.On
         }
     }
 
+    public void setScore(int score) {
+        m_score.setText(String.valueOf(score));
+    }
+
     @Override
     public void onScoreChanged(int score) {
         ObjectAnimator anim = ObjectAnimator.ofInt(this, "score", m_lastScoreValue, score);
@@ -65,6 +72,21 @@ public class MainActivity extends AppCompatActivity implements GameController.On
         anim.start();
 
         m_lastScoreValue = score;
+    }
+
+    @Override
+    public void onStateChanged(int state) {
+        switch(state) {
+            case GameController.STATE_WON:
+                m_statusText.setText(R.string.you_have_won);
+                break;
+            case GameController.STATE_LOST:
+                m_statusText.setText(R.string.game_over);
+                break;
+            default:
+                m_statusText.setText("");
+                break;
+        }
     }
 
     @Override
@@ -83,7 +105,19 @@ public class MainActivity extends AppCompatActivity implements GameController.On
         b.create().show();
     }
 
-    public void setScore(int score) {
-        m_score.setText(String.valueOf(score));
+    @Override
+    public void onWin() {
+        AlertDialog.Builder b = new AlertDialog.Builder(this);
+        b.setTitle(R.string.you_have_won);
+        b.setMessage(R.string.you_have_won_body);
+        b.setCancelable(false);
+        b.setPositiveButton(R.string.ok, null);
+        b.setNeutralButton(R.string.restart, new DialogInterface.OnClickListener() {
+            @Override
+            public void onClick(DialogInterface dialog, int which) {
+                m_gameView.restartGame();
+            }
+        });
+        b.create().show();
     }
 }

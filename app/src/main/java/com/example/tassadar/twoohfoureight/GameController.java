@@ -8,7 +8,9 @@ import java.util.Random;
 public class GameController {
     public interface OnStateChangeListener {
         void onScoreChanged(int score);
+        void onStateChanged(int state);
         void onLoss();
+        void onWin();
     }
 
     public static final int GRID = 4;
@@ -19,7 +21,13 @@ public class GameController {
     public static final int UP = -GRID;
     public static final int DOWN = GRID;
 
+    public static final int STATE_UNINITIALIZED = 0;
+    public static final int STATE_IN_GAME = 1;
+    public static final int STATE_WON = 2;
+    public static final int STATE_LOST = 3;
+
     private static final int START_TILES = 2;
+    private static final int WINNING_TILE = 2048;
 
     private static class Tile {
         int id;
@@ -33,10 +41,6 @@ public class GameController {
     private PositionSeeker m_seeker;
 
     private OnStateChangeListener m_listener;
-
-    private static final int STATE_UNINITIALIZED = 0;
-    private static final int STATE_IN_GAME = 1;
-    private static final int STATE_LOST = 2;
 
     private int m_state;
     private int m_score;
@@ -53,7 +57,7 @@ public class GameController {
 
     public void reinitialize(Renderer renderer) {
         m_usedTiles = 0;
-        m_state = STATE_IN_GAME;
+        setState(STATE_IN_GAME);
         setScore(0);
 
         renderer.removeAllTiles();
@@ -81,6 +85,14 @@ public class GameController {
         }
     }
 
+    private void setState(int state) {
+        if(state != m_state) {
+            m_state = state;
+            if(m_listener != null)
+                m_listener.onStateChanged(state);
+        }
+    }
+
     public void restoreState(Renderer renderer) {
         switch(m_state) {
             case STATE_UNINITIALIZED:
@@ -88,6 +100,7 @@ public class GameController {
                 break;
             case STATE_IN_GAME:
             case STATE_LOST:
+            case STATE_WON:
                 renderer.removeAllTiles();
                 for(int i = 0; i < MAX_TILES; ++i) {
                     if(m_tiles[i].value != 0) {
@@ -103,7 +116,6 @@ public class GameController {
         e.putInt("game_state", m_state);
         e.putInt("game_score", m_score);
 
-
         StringBuilder tileValues = new StringBuilder();
         for(int i = 0; i < MAX_TILES; ++i) {
             tileValues.append(m_tiles[i].value);
@@ -114,7 +126,7 @@ public class GameController {
     }
 
     public void restoreInstanceState(SharedPreferences pref) {
-        m_state = pref.getInt("game_state", 0);
+        setState(pref.getInt("game_state", 0));
         setScore(pref.getInt("game_score", 0));
 
         String tileValues = pref.getString("game_tile_values", null);
@@ -131,7 +143,7 @@ public class GameController {
     }
 
     public void onSwipe(int direction, Renderer renderer) {
-        if(m_state != STATE_IN_GAME) {
+        if(m_state != STATE_IN_GAME && m_state != STATE_WON) {
             renderer.shake();
             return;
         }
@@ -171,6 +183,10 @@ public class GameController {
 
                     --m_usedTiles;
                     points += nextTile.value;
+
+                    if(nextTile.value == WINNING_TILE && m_state != STATE_WON) {
+                        setWon();
+                    }
                 } else {
                     renderer.setTilePosition(t.id, next);
                     m_tiles[i] = m_tiles[next];
@@ -290,7 +306,7 @@ public class GameController {
     }
 
     private void checkForLoss() {
-        if(m_usedTiles < MAX_TILES)
+        if(m_usedTiles < MAX_TILES || m_state == STATE_WON)
             return;
 
         for(int y = 0; y < GRID; ++y) {
@@ -302,10 +318,16 @@ public class GameController {
             }
         }
 
-        // if we got here, it means there wer no mergeable tiles
-        m_state = STATE_LOST;
+        // if we got here, it means there were no mergeable tiles
+        setState(STATE_LOST);
         if(m_listener != null) {
             m_listener.onLoss();
         }
+    }
+
+    private void setWon() {
+        setState(STATE_WON);
+        if(m_listener != null)
+            m_listener.onWin();
     }
 }
