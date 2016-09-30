@@ -1,8 +1,5 @@
 package com.example.tassadar.twoohfoureight;
 
-import android.animation.ObjectAnimator;
-
-
 public interface Renderer {
     void addTile(int id, int value, int position);
     void removeTile(int id);

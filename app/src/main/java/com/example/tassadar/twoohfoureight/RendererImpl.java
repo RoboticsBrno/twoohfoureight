@@ -11,7 +11,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
-import android.util.Log;
 import android.view.View;
 import android.view.animation.OvershootInterpolator;
 
@@ -233,7 +232,7 @@ public class RendererImpl implements Renderer {
     }
 
     private static class RenderedTile {
-        final PointF center = new PointF(); // also acts as a lock
+        final PointF center = new PointF();
         float scale;
 
         Paint rectPaint;
@@ -265,7 +264,6 @@ public class RendererImpl implements Renderer {
 
     public void addTile(int id, int value, int position) {
         RenderedTile t = new RenderedTile();
-        t.scale = 0.f;
 
         ObjectAnimator anim = ObjectAnimator.ofFloat(t, "scale", 0.f, 1.f);
         anim.setInterpolator(new OvershootInterpolator());
@@ -298,7 +296,6 @@ public class RendererImpl implements Renderer {
         } else if(idx >= m_tilePaints.length) {
             idx = m_tilePaints.length - 1;
         }
-
 
         RenderedTile tile = m_tiles.get(tileId);
         if(tile == null) {

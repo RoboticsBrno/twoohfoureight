@@ -3,6 +3,7 @@ package com.example.tassadar.twoohfoureight;
 import android.animation.ObjectAnimator;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.SharedPreferences;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.Menu;
@@ -26,15 +27,17 @@ public class MainActivity extends AppCompatActivity implements GameController.On
         m_controller = m_gameView.getController();
         m_controller.setListener(this);
 
-        if(savedInstanceState != null) {
-            m_controller.restoreInstanceState(savedInstanceState);
-        }
+        SharedPreferences pref = getPreferences(MODE_PRIVATE);
+        m_controller.restoreInstanceState(pref);
     }
 
     @Override
-    protected void onSaveInstanceState(Bundle state) {
-        m_controller.saveInstanceState(state);
-        super.onSaveInstanceState(state);
+    protected void onDestroy() {
+        super.onDestroy();
+
+        SharedPreferences.Editor editor = getPreferences(MODE_PRIVATE).edit();
+        m_controller.saveInstanceState(editor);
+        editor.apply();
     }
 
     @Override

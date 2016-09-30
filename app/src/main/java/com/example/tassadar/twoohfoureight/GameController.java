@@ -1,6 +1,6 @@
 package com.example.tassadar.twoohfoureight;
 
-import android.os.Bundle;
+import android.content.SharedPreferences;
 
 import java.util.HashSet;
 import java.util.Random;
@@ -99,27 +99,32 @@ public class GameController {
         }
     }
 
-    public void saveInstanceState(Bundle state) {
-        state.putInt("game_state", m_state);
-        state.putInt("game_score", m_score);
+    public void saveInstanceState(SharedPreferences.Editor e) {
+        e.putInt("game_state", m_state);
+        e.putInt("game_score", m_score);
 
-        int[] tileValues = new int[MAX_TILES];
+
+        StringBuilder tileValues = new StringBuilder();
         for(int i = 0; i < MAX_TILES; ++i) {
-            tileValues[i] = m_tiles[i].value;
+            tileValues.append(m_tiles[i].value);
+            tileValues.append(',');
         }
-        state.putIntArray("game_tiles", tileValues);
+
+        e.putString("game_tile_values", tileValues.toString());
     }
 
-    public void restoreInstanceState(Bundle state) {
-        m_state = state.getInt("game_state");
-        setScore(state.getInt("game_score"));
+    public void restoreInstanceState(SharedPreferences pref) {
+        m_state = pref.getInt("game_state", 0);
+        setScore(pref.getInt("game_score", 0));
 
-        int[] tileValues = state.getIntArray("game_tiles");
-        if(m_state >= STATE_IN_GAME && tileValues != null && tileValues.length == MAX_TILES) {
-            for(int i = 0; i < MAX_TILES; ++i) {
-                if(tileValues[i] != 0) {
+        String tileValues = pref.getString("game_tile_values", null);
+        if(m_state >= STATE_IN_GAME && tileValues != null) {
+            String[] tokens = tileValues.split(",");
+            for(int i = 0; i < MAX_TILES && i < tokens.length; ++i) {
+                int value = Integer.parseInt(tokens[i]);
+                if(value != 0) {
                     m_tiles[i].id = ++m_tileIdCounter;
-                    m_tiles[i].value = tileValues[i];
+                    m_tiles[i].value = value;
                 }
             }
         }
