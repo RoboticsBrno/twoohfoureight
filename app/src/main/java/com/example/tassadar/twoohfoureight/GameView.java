@@ -78,13 +78,13 @@ public class GameView extends View {
         public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
             int direction;
             if(Math.abs(e1.getX() - e2.getX()) > Math.abs(e1.getY() - e2.getY())) {
-                if(velocityX > 0) {
+                if(e1.getX() < e2.getX()) {
                     direction = GameController.RIGHT;
                 } else {
                     direction = GameController.LEFT;
                 }
             } else {
-                if(velocityY > 0) {
+                if(e1.getY() < e2.getY()) {
                     direction = GameController.DOWN;
                 } else {
                     direction = GameController.UP;
