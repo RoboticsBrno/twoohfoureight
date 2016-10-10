@@ -137,6 +137,7 @@ public class GameController {
                 if(value != 0) {
                     m_tiles[i].id = ++m_tileIdCounter;
                     m_tiles[i].value = value;
+                    ++m_usedTiles;
                 }
             }
         }
