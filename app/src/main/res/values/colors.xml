@@ -10,4 +10,16 @@
     <color name="baseBackground">#faf8ef</color>
     <color name="gridBackground">#bbada0</color>
     <color name="tileBackground">#d3cac2</color>
+
+    <color name="tileTextLight">#f9f6f2</color>
+    <color name="tileTextDark">#776E65</color>
+
+    <array name="tileColors">
+        <item>#eee4da</item> <!-- 2 -->
+        <item>#eee4da</item> <!-- 4 -->
+        <item>#f78e48</item> <!-- 8 -->
+        <item>#fc5e2e</item> <!-- 16 -->
+        <item>#ff3333</item> <!-- 32 -->
+        <item>#ff0000</item> <!-- 64 -->
+    </array>
 </resources>

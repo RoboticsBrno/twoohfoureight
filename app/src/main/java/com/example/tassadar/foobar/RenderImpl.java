@@ -2,9 +2,17 @@ package com.example.tassadar.foobar;
 
 import android.content.Context;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
+import android.graphics.PointF;
 import android.graphics.RectF;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Set;
+import java.util.Vector;
 
 /**
  * Created by tassadar on 18.10.16.
@@ -21,15 +29,23 @@ public class RenderImpl {
     private float m_gridRoundness;
     private RectF m_baseRect;
     private RectF[] m_gridRects;
+    private RectF m_basePlayTileRect;
 
+    private Paint[] m_tilePaints;
+    private Paint m_tileTextLight;
+    private Paint m_tileTextDark;
     private Paint m_baseRectPaint;
     private Paint m_gridRectPaint;
+
+    private HashMap<Integer, PlayTile> m_playTiles;
 
     RenderImpl(Context ctx) {
         m_gridRects = new RectF[GRID*GRID];
         for(int i = 0; i < m_gridRects.length; ++i) {
             m_gridRects[i] = new RectF();
         }
+
+        m_playTiles = new HashMap<>();
 
         Resources res = ctx.getResources();
 
@@ -40,6 +56,25 @@ public class RenderImpl {
         m_gridRectPaint = new Paint();
         m_gridRectPaint.setColor(res.getColor(R.color.tileBackground));
         m_gridRectPaint.setAntiAlias(true);
+
+        m_tileTextDark = new Paint();
+        m_tileTextDark.setColor(res.getColor(R.color.tileTextDark));
+        m_tileTextDark.setAntiAlias(true);
+        m_tileTextDark.setTextAlign(Paint.Align.CENTER);
+
+        m_tileTextLight = new Paint();
+        m_tileTextLight.setColor(res.getColor(R.color.tileTextLight));
+        m_tileTextLight.setAntiAlias(true);
+        m_tileTextLight.setTextAlign(Paint.Align.CENTER);
+
+        TypedArray ta = res.obtainTypedArray(R.array.tileColors);
+        m_tilePaints = new Paint[ta.length()];
+        for (int i = 0; i < ta.length(); i++) {
+            m_tilePaints[i] = new Paint();
+            m_tilePaints[i].setColor(ta.getColor(i, 0));
+            m_tilePaints[i].setAntiAlias(true);
+        }
+        ta.recycle();
     }
 
     public boolean dimensionsChanged(int w, int h) {
@@ -64,6 +99,13 @@ public class RenderImpl {
 
         if(!m_initialized) {
             m_initialized = true;
+
+            int id = 0;
+            addTile(id++, 4, 0);
+            addTile(id++, 8, 4);
+            addTile(id++, 2, 5);
+            addTile(id++, 32, 15);
+
             return true;
         }
 
@@ -75,6 +117,11 @@ public class RenderImpl {
         final float startX = m_baseRect.left + padding;
 
         final float tileWidth = (m_baseRect.width() * (1 - GRID_PADDING)) / GRID;
+
+        m_basePlayTileRect = new RectF(-tileWidth/2, -tileWidth/2, tileWidth/2, tileWidth/2);
+
+        m_tileTextDark.setTextSize(tileWidth * 0.4f);
+        m_tileTextLight.setTextSize(tileWidth * 0.4f);
 
         float tileX = startX;
         float tileY = m_baseRect.top + padding;
@@ -98,6 +145,57 @@ public class RenderImpl {
 
         for(RectF rect : m_gridRects) {
             c.drawRoundRect(rect, m_gridRoundness, m_gridRoundness, m_gridRectPaint);
+        }
+
+        for(Map.Entry<Integer, PlayTile> e  : m_playTiles.entrySet()) {
+            PlayTile t = e.getValue();
+
+            c.save();
+            c.translate(t.center.x, t.center.y);
+            c.drawRoundRect(m_basePlayTileRect, m_gridRoundness, m_gridRoundness, t.rectPaint);
+
+            final float y = -(t.textPaint.descent() + t.textPaint.ascent()) / 2;
+            c.drawText(t.valueStr, 0.f, y, t.textPaint);
+            c.restore();
+        }
+    }
+
+
+    public void addTile(int id, int value, int position) {
+        PlayTile t = new PlayTile();
+        t.center = new PointF();
+
+        m_playTiles.put(id, t);
+
+        setTilePosition(id, position, false);
+        setTileValue(id, value);
+    }
+
+    public void setTilePosition(int id, int position, boolean animate) {
+        PlayTile t = m_playTiles.get(id);
+        t.gridIndex = position;
+        t.setPosition(m_gridRects[position]);
+    }
+
+    public void setTileValue(int id, int value) {
+        int idx = Integer.numberOfTrailingZeros(value) - 1;
+        if(idx < 0) {
+            idx = 0;
+        } else if(idx >= m_tilePaints.length) {
+            idx = m_tilePaints.length - 1;
+        }
+
+        PlayTile tile = m_playTiles.get(id);
+        tile.rectPaint = m_tilePaints[idx];
+        tile.valueStr = String.valueOf(value);
+        tile.value = value;
+
+        final int c = tile.rectPaint.getColor();
+        // Is the color dark?
+        if ((Color.red(c) + Color.green(c) + Color.blue(c)) / 3 < 170) {
+            tile.textPaint = m_tileTextLight;
+        } else {
+            tile.textPaint = m_tileTextDark;
         }
     }
 }
