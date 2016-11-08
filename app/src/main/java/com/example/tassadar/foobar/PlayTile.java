@@ -15,6 +15,7 @@ public class PlayTile {
     String valueStr;
     int value;
     int gridIndex;
+    float scale;
 
     public void setX(float x) {
         center.x = x;
@@ -27,4 +28,6 @@ public class PlayTile {
     public void setPosition(RectF rect) {
         center.set(rect.centerX(), rect.centerY());
     }
+
+    public void setScale(float ns) { scale = ns; }
 }
