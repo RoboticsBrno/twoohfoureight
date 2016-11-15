@@ -12,6 +12,7 @@ import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
 import android.view.View;
+import android.view.animation.OvershootInterpolator;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -40,7 +41,7 @@ public class RenderImpl {
     private Paint m_tileTextDark;
     private Paint m_baseRectPaint;
     private Paint m_gridRectPaint;
-    private View parent;
+    private View m_parent;
 
     private HashMap<Integer, PlayTile> m_playTiles;
 
@@ -50,7 +51,7 @@ public class RenderImpl {
             m_gridRects[i] = new RectF();
         }
 
-        this.parent = parent;
+        m_parent = parent;
 
         m_playTiles = new HashMap<>();
 
@@ -171,18 +172,18 @@ public class RenderImpl {
     public void addTile(int id, int value, int position) {
         PlayTile t = new PlayTile();
         t.center = new PointF();
-        t.scale = 0.5f;
 
         m_playTiles.put(id, t);
 
         setTilePosition(id, position, false);
         setTileValue(id, value);
-        ObjectAnimator oa = ObjectAnimator.ofFloat(t, "scale", 0.0f, 1.2f, 1.0f);
-        oa.setDuration(1500);
+        ObjectAnimator oa = ObjectAnimator.ofFloat(t, "scale", 0.0f, 1.0f);
+        oa.setDuration(300);
+        oa.setInterpolator(new OvershootInterpolator());
         oa.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                parent.invalidate();
+                m_parent.invalidate();
             }
         });
         oa.start();
