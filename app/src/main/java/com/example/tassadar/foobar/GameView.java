@@ -36,7 +36,7 @@ public class GameView extends View {
     }
 
     private void init(Context ctx) {
-        m_renderer = new RenderImpl(ctx);
+        m_renderer = new RenderImpl(ctx, this);
 
         addOnLayoutChangeListener(m_layoutChangedListener);
     }

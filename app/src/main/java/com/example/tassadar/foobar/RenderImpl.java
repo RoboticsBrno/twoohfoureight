@@ -1,5 +1,8 @@
 package com.example.tassadar.foobar;
 
+import android.animation.Animator;
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -8,6 +11,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
 import android.graphics.RectF;
+import android.view.View;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -36,14 +40,17 @@ public class RenderImpl {
     private Paint m_tileTextDark;
     private Paint m_baseRectPaint;
     private Paint m_gridRectPaint;
+    private View parent;
 
     private HashMap<Integer, PlayTile> m_playTiles;
 
-    RenderImpl(Context ctx) {
+    RenderImpl(Context ctx, View parent) {
         m_gridRects = new RectF[GRID*GRID];
         for(int i = 0; i < m_gridRects.length; ++i) {
             m_gridRects[i] = new RectF();
         }
+
+        this.parent = parent;
 
         m_playTiles = new HashMap<>();
 
@@ -152,6 +159,7 @@ public class RenderImpl {
 
             c.save();
             c.translate(t.center.x, t.center.y);
+            c.scale(t.scale, t.scale);
             c.drawRoundRect(m_basePlayTileRect, m_gridRoundness, m_gridRoundness, t.rectPaint);
 
             final float y = -(t.textPaint.descent() + t.textPaint.ascent()) / 2;
@@ -160,15 +168,24 @@ public class RenderImpl {
         }
     }
 
-
     public void addTile(int id, int value, int position) {
         PlayTile t = new PlayTile();
         t.center = new PointF();
+        t.scale = 0.5f;
 
         m_playTiles.put(id, t);
 
         setTilePosition(id, position, false);
         setTileValue(id, value);
+        ObjectAnimator oa = ObjectAnimator.ofFloat(t, "scale", 0.0f, 1.2f, 1.0f);
+        oa.setDuration(1500);
+        oa.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                parent.invalidate();
+            }
+        });
+        oa.start();
     }
 
     public void setTilePosition(int id, int position, boolean animate) {
