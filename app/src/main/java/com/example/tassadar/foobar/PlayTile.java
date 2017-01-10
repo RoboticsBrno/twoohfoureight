@@ -30,4 +30,7 @@ public class PlayTile {
     }
 
     public void setScale(float ns) { scale = ns; }
+
+    public float getX() { return center.x; }
+    public float getY() { return center.y; }
 }

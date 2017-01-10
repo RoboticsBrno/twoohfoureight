@@ -113,6 +113,13 @@ public class RenderImpl {
             addTile(id++, 2, 5);
             addTile(id++, 32, 15);
 
+            this.parent.postDelayed(new Runnable() {
+                @Override
+                public void run() {
+                    setTilePosition(0, 3, true);
+                }
+            }, 2000);
+
             return true;
         }
 
@@ -191,7 +198,28 @@ public class RenderImpl {
     public void setTilePosition(int id, int position, boolean animate) {
         PlayTile t = m_playTiles.get(id);
         t.gridIndex = position;
-        t.setPosition(m_gridRects[position]);
+
+        if (animate) {
+            ObjectAnimator oa;
+            if (t.getX() == m_gridRects[position].centerX()) {
+                // change Y position
+                oa = ObjectAnimator.ofFloat(t, "y", t.getY(), m_gridRects[position].centerY());
+            } else {
+                // change X position
+                oa = ObjectAnimator.ofFloat(t, "x", t.getX(), m_gridRects[position].centerX());
+            }
+            oa.setDuration(500);
+            oa.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+                @Override
+                public void onAnimationUpdate(ValueAnimator animation) {
+                    parent.invalidate();
+                }
+            });
+            oa.start();
+        } else {
+            t.setPosition(m_gridRects[position]);
+        }
+
     }
 
     public void setTileValue(int id, int value) {
