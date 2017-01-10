@@ -33,4 +33,6 @@ public class PlayTile {
 
     public float getX() { return center.x; }
     public float getY() { return center.y; }
+
+    public int getValue() { return value; }
 }
