@@ -111,14 +111,15 @@ public class RenderImpl {
             int id = 0;
             addTile(id++, 4, 0);
             addTile(id++, 8, 4);
-            addTile(id++, 8, 5);
+            addTile(id++, 8, 7);
             addTile(id++, 32, 15);
 
-            this.parent.postDelayed(new Runnable() {
+            this.m_parent.postDelayed(new Runnable() {
                 @Override
                 public void run() {
-                    //setTilePosition(0, 3, true);
-                    mergeTails(1,2,0);
+                    setTilePosition(0, 3, true);
+                    //mergeTiles(1,2);
+                    mergeTiles(2, 1);
                 }
             }, 2000);
 
@@ -152,6 +153,10 @@ public class RenderImpl {
         }
     }
 
+    public void invalidate() {
+        m_parent.invalidate();
+    }
+
     public void render(Canvas c) {
         if(!m_initialized) {
             return;
@@ -177,103 +182,6 @@ public class RenderImpl {
         }
     }
 
-    public void addTile(int id, int value, int position) {
-        PlayTile t = new PlayTile();
-        t.center = new PointF();
-
-        m_playTiles.put(id, t);
-
-        setTilePosition(id, position, false);
-        setTileValue(id, value);
-        ObjectAnimator oa = ObjectAnimator.ofFloat(t, "scale", 0.0f, 1.0f);
-        oa.setDuration(300);
-        oa.setInterpolator(new OvershootInterpolator());
-        oa.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                m_parent.invalidate();
-            }
-        });
-        oa.start();
-    }
-
-    public ObjectAnimator raise(int id) {
-        ObjectAnimator oa = ObjectAnimator.ofFloat(m_playTiles.get(id), "scale", 1.0f, 1.3f, 1.0f);
-        oa.setDuration(300);
-        oa.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator animation) {
-                parent.invalidate();
-            }
-        });
-        oa.start();
-        return oa;
-    }
-
-    public ObjectAnimator setTilePosition(int id, int position, boolean animate) {
-        PlayTile t = m_playTiles.get(id);
-        t.gridIndex = position;
-
-        if (animate) {
-            ObjectAnimator oa;
-            if (t.getX() == m_gridRects[position].centerX()) {
-                // change Y position
-                oa = ObjectAnimator.ofFloat(t, "y", t.getY(), m_gridRects[position].centerY());
-            } else {
-                // change X position
-                oa = ObjectAnimator.ofFloat(t, "x", t.getX(), m_gridRects[position].centerX());
-            }
-            oa.setDuration(500);
-            oa.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-                @Override
-                public void onAnimationUpdate(ValueAnimator animation) {
-                    parent.invalidate();
-                }
-            });
-            oa.start();
-            return oa;
-        } else {
-            t.setPosition(m_gridRects[position]);
-            return null;
-        }
-    }
-
-    public void mergeTails(int tail1, int tail2, int mergePos) {
-        ObjectAnimator anim = setTilePosition(tail2, mergePos, true);
-        anim.addListener(new MergeTailAnimatorListener(tail1, tail2));
-    }
-
-    private class MergeTailAnimatorListener implements Animator.AnimatorListener {
-        int tail1, tail2;
-
-        MergeTailAnimatorListener(int tail1, int tail2) {
-            this.tail1 = tail1;
-            this.tail2 = tail2;
-        }
-
-        @Override
-        public void onAnimationStart(Animator animation) {
-
-        }
-
-        @Override
-        public void onAnimationEnd(Animator animation) {
-            setTileValue(this.tail1, m_playTiles.get(this.tail1).getValue()*2);
-            m_playTiles.remove(this.tail2);
-            raise(this.tail1);
-        }
-
-        @Override
-        public void onAnimationCancel(Animator animation) {
-
-        }
-
-        @Override
-        public void onAnimationRepeat(Animator animation) {
-
-        }
-    }
-
     public void setTileValue(int id, int value) {
         int idx = Integer.numberOfTrailingZeros(value) - 1;
         if(idx < 0) {
@@ -295,4 +203,100 @@ public class RenderImpl {
             tile.textPaint = m_tileTextDark;
         }
     }
+
+    public void addTile(int id, int value, int position) {
+        PlayTile t = new PlayTile();
+        t.center = new PointF();
+
+        m_playTiles.put(id, t);
+
+        setTilePosition(id, position, false);
+        setTileValue(id, value);
+        ObjectAnimator oa = ObjectAnimator.ofFloat(t, "scale", 0.0f, 1.0f);
+        oa.setDuration(500);
+        oa.setStartDelay(200);
+        oa.setInterpolator(new OvershootInterpolator());
+        oa.addUpdateListener(m_animationInvalidateListener);
+        oa.start();
+    }
+
+    public ObjectAnimator raise(int id) {
+        ObjectAnimator oa = ObjectAnimator.ofFloat(m_playTiles.get(id), "scale", 1.0f, 1.3f, 1.0f);
+        oa.setDuration(300);
+        oa.addUpdateListener(m_animationInvalidateListener);
+        oa.start();
+        return oa;
+    }
+
+    public ObjectAnimator setTilePosition(int id, int position, boolean animate) {
+        PlayTile t = m_playTiles.get(id);
+        t.gridIndex = position;
+
+        if (animate) {
+            ObjectAnimator oa;
+            if (t.getX() == m_gridRects[position].centerX()) {
+                // change Y position
+                oa = ObjectAnimator.ofFloat(t, "y", t.getY(), m_gridRects[position].centerY());
+            } else {
+                // change X position
+                oa = ObjectAnimator.ofFloat(t, "x", t.getX(), m_gridRects[position].centerX());
+            }
+            oa.setDuration(500);
+            oa.addUpdateListener(m_animationInvalidateListener);
+            oa.start();
+            return oa;
+        } else {
+            t.setPosition(m_gridRects[position]);
+            return null;
+        }
+    }
+
+    public void mergeTiles(int tileIdTarget, int tileIdToMove) {
+        PlayTile tileTarget = m_playTiles.get(tileIdTarget);
+        ObjectAnimator anim = setTilePosition(tileIdToMove, tileTarget.gridIndex, true);
+        anim.addListener(new MergeTileAnimatorListener(tileIdTarget, tileIdToMove));
+    }
+
+    private class MergeTileAnimatorListener implements Animator.AnimatorListener {
+        private int m_tileIdTarget;
+        private int m_tileIdToRemove;
+
+        MergeTileAnimatorListener(int tileIdTarget, int tileIdToRemove) {
+            m_tileIdTarget = tileIdTarget;
+            m_tileIdToRemove = tileIdToRemove;
+        }
+
+        @Override
+        public void onAnimationStart(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationEnd(Animator animation) {
+            m_playTiles.remove(m_tileIdToRemove);
+
+            PlayTile target = m_playTiles.get(m_tileIdTarget);
+            setTileValue(m_tileIdTarget, target.value*2);
+            raise(m_tileIdTarget);
+
+            m_parent.invalidate();
+        }
+
+        @Override
+        public void onAnimationCancel(Animator animation) {
+
+        }
+
+        @Override
+        public void onAnimationRepeat(Animator animation) {
+
+        }
+    }
+
+    private final ValueAnimator.AnimatorUpdateListener m_animationInvalidateListener = new ValueAnimator.AnimatorUpdateListener() {
+        @Override
+        public void onAnimationUpdate(ValueAnimator animation) {
+            m_parent.invalidate();
+        }
+    };
 }

@@ -17,10 +17,15 @@ public class PlayTile {
     int gridIndex;
     float scale;
 
+    public float getX() {
+        return center.x;
+    }
+    public float getY() {
+        return center.y;
+    }
     public void setX(float x) {
         center.x = x;
     }
-
     public void setY(float y) {
         center.y = y;
     }
@@ -30,9 +35,4 @@ public class PlayTile {
     }
 
     public void setScale(float ns) { scale = ns; }
-
-    public float getX() { return center.x; }
-    public float getY() { return center.y; }
-
-    public int getValue() { return value; }
 }
