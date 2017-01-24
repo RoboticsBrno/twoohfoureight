@@ -28,8 +28,16 @@ public class GameController {
     }
 
     void restart() {
+        // remove all tails
+        for (int i = 0; i < START_TILES; i++) {
+            tiles[i].value = 0;
+            tiles[i].id = 0;
+        }
+        r.removeAllTails();
+
+        // create new tails
         Random rnd = new Random();
-        int pos  = rnd.nextInt();
+        int pos;
 
         for(int i = 0; i < START_TILES; i++) {
             // generate unique pos

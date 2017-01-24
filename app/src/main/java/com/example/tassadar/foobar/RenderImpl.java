@@ -294,4 +294,14 @@ public class RenderImpl implements Renderer {
             tile.textPaint = m_tileTextDark;
         }
     }
+
+    public void removeAllTails() {
+        m_playTiles.clear();
+        invalidate();
+    }
+
+    public void invalidate() {
+        parent.invalidate();
+    }
+
 }
