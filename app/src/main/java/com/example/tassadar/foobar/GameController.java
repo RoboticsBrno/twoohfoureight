@@ -17,6 +17,11 @@ public class GameController {
         int value; // value = 0 <-> empty tile
     }
 
+    public static final int D_LEFT = 0;
+    public static final int D_RIGHT = 1;
+    public static final int D_UP = 2;
+    public static final int D_DOWN = 3;
+
     Tile[] tiles;
 
     GameController(Renderer r) {
@@ -53,6 +58,14 @@ public class GameController {
 
             r.addTile(tiles[pos].id, tiles[pos].value, pos);
         }
+    }
+
+    public void swipe(int direction) {
+        if (direction == D_LEFT) {
+            
+        }
+
+
     }
 
 }
