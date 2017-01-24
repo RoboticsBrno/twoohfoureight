@@ -13,6 +13,7 @@ import android.view.View;
 
 public class GameView extends View {
     private RenderImpl m_renderer;
+    private GameController m_controller;
 
     public GameView(Context context) {
         super(context);
@@ -37,6 +38,7 @@ public class GameView extends View {
 
     private void init(Context ctx) {
         m_renderer = new RenderImpl(ctx, this);
+        m_controller = new GameController(m_renderer);
 
         addOnLayoutChangeListener(m_layoutChangedListener);
     }
@@ -45,6 +47,7 @@ public class GameView extends View {
         @Override
         public void onLayoutChange(View v, int left, int top, int right, int bottom, int oldLeft, int oldTop, int oldRight, int oldBottom) {
             m_renderer.dimensionsChanged(right -left, bottom - top);
+            m_controller.restart();
         }
     };
 

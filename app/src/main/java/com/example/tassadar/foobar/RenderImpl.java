@@ -22,7 +22,7 @@ import java.util.Vector;
  * Created by tassadar on 18.10.16.
  */
 
-public class RenderImpl {
+public class RenderImpl implements Renderer {
     public static final int GRID = 4;
 
     private static final float GRID_PADDING = 0.1f;
@@ -107,7 +107,7 @@ public class RenderImpl {
         if(!m_initialized) {
             m_initialized = true;
 
-            int id = 0;
+            /*int id = 0;
             addTile(id++, 4, 0);
             addTile(id++, 8, 4);
             addTile(id++, 8, 5);
@@ -119,7 +119,7 @@ public class RenderImpl {
                     //setTilePosition(0, 3, true);
                     mergeTails(1,2,0);
                 }
-            }, 2000);
+            }, 2000);*/
 
             return true;
         }
