@@ -19,13 +19,13 @@ import java.util.Map;
 import java.util.Set;
 import java.util.Vector;
 
+import static com.example.tassadar.foobar.GameController.GRID;
+
 /**
  * Created by tassadar on 18.10.16.
  */
 
-public class RenderImpl {
-    public static final int GRID = 4;
-
+public class RenderImpl implements Renderer {
     private static final float GRID_PADDING = 0.1f;
 
     private int m_lastWidth, m_lastHeight;
@@ -107,22 +107,6 @@ public class RenderImpl {
 
         if(!m_initialized) {
             m_initialized = true;
-
-            int id = 0;
-            addTile(id++, 4, 0);
-            addTile(id++, 8, 4);
-            addTile(id++, 8, 7);
-            addTile(id++, 32, 15);
-
-            this.m_parent.postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    setTilePosition(0, 3, true);
-                    //mergeTiles(1,2);
-                    mergeTiles(2, 1);
-                }
-            }, 2000);
-
             return true;
         }
 
@@ -180,6 +164,16 @@ public class RenderImpl {
             c.drawText(t.valueStr, 0.f, y, t.textPaint);
             c.restore();
         }
+    }
+
+    public void removeAllTiles() {
+        m_playTiles.clear();
+        invalidate();
+    }
+
+    public void removeTile(int id) {
+        m_playTiles.remove(id);
+        invalidate();
     }
 
     public void setTileValue(int id, int value) {
