@@ -1,4 +1,4 @@
-package com.example.tassadar.twoohfoureight;
+package com.tassadar.twoohfoureight;
 
 import android.animation.ObjectAnimator;
 import android.app.AlertDialog;

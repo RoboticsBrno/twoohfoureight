@@ -10,7 +10,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="vertical"
     android:background="@color/baseBackground"
-    tools:context="com.example.tassadar.twoohfoureight.MainActivity">
+    tools:context="com.tassadar.twoohfoureight.MainActivity">
 
     <TextView android:id="@+id/score"
         android:layout_width="wrap_content"
@@ -31,7 +31,7 @@
         android:textColor="@color/colorAccent"
         android:text="@string/game_over" />
 
-    <com.example.tassadar.twoohfoureight.GameView
+    <com.tassadar.twoohfoureight.GameView
         android:id="@+id/game_view"
         android:layout_width="match_parent"
         android:layout_height="0dp"

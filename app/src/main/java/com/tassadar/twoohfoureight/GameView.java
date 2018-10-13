@@ -1,4 +1,4 @@
-package com.example.tassadar.twoohfoureight;
+package com.tassadar.twoohfoureight;
 
 import android.annotation.TargetApi;
 import android.content.Context;

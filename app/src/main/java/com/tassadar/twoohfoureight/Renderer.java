@@ -1,4 +1,4 @@
-package com.example.tassadar.twoohfoureight;
+package com.tassadar.twoohfoureight;
 
 public interface Renderer {
     void addTile(int id, int value, int position);

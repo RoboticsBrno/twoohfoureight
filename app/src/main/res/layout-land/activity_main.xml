@@ -10,7 +10,7 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     android:orientation="horizontal"
     android:background="@color/baseBackground"
-    tools:context="com.example.tassadar.twoohfoureight.MainActivity">
+    tools:context="com.tassadar.twoohfoureight.MainActivity">
 
     <LinearLayout
         android:layout_width="wrap_content"
@@ -39,7 +39,7 @@
             android:textAlignment="center" />
     </LinearLayout>
 
-    <com.example.tassadar.twoohfoureight.GameView
+    <com.tassadar.twoohfoureight.GameView
         android:id="@+id/game_view"
         android:layout_width="0dp"
         android:layout_height="match_parent"
